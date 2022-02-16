@@ -8,6 +8,6 @@ def streamer(queue, path):
             ret, frame = cap.read()
             queue.put((ret, frame))  # enqueue
             if not ret:
-                print("exit stream")
+                # print("exit stream")
                 cap.release()
                 break

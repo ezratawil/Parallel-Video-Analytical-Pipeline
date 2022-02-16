@@ -45,7 +45,7 @@ def detect(frame_queue, detection_queue):
         ret, frame = frame_queue.get()
         if not ret:
             detection_queue.put((ret, [], [], [], []))
-            print("exiting detect...")
+            # print("exiting detect...")
             break
         frame_blur = cv2.GaussianBlur(frame, (21, 21), 0)
         fgmask = fgbg.apply(frame_blur, learningRate=0.2)
