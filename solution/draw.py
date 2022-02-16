@@ -7,11 +7,11 @@ def draw(detection_queue):
     # Create a mask image for drawing purposes
     mask = np.zeros(shape=(540, 960, 3), dtype='uint8')  # create mask the size of image
     while True:
-        lst = detection_queue.get() # dequeue
-        ret = lst[0]
+        tup = detection_queue.get() # dequeue
+        ret = tup[0]
         if not ret:
             break
-        frame, good_new, good_old, bboxs = lst[1], lst[2], lst[3], lst[4]
+        frame, good_new, good_old, bboxs = tup[1], tup[2], tup[3], tup[4]  # unpack
         for i, (new, old) in enumerate(zip(good_new, good_old)):
             a, b = new.ravel()
             c, d = old.ravel()
