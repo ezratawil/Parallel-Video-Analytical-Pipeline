@@ -1,4 +1,5 @@
 import multiprocessing as mp
+import cv2
 import stream
 import draw
 import detect
@@ -17,9 +18,10 @@ def parallelize(path):
     processes = [streamer, detector, drawer]
     for proc in processes:
         proc.start()
-
     for proc in processes:
         proc.join()
+        # proc.terminate()
+    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':

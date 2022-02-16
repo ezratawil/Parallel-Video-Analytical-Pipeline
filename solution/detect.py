@@ -2,9 +2,7 @@ import cv2
 import numpy as np
 
 from config import (NUM_OF_FRAMES_TO_STACK,
-                    lk_params,
-                    colors,
-                    video_file_path)
+                    lk_params)
 
 
 def get_points_from_cnts(cnts):
@@ -25,7 +23,7 @@ def get_points_from_cnts(cnts):
     return np.array(points).astype("float32"), bboxs
 
 
-def detect(frame_queue,detection_queue):
+def detect(frame_queue, detection_queue):
     # mog background subtraction
     fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
 
@@ -33,7 +31,7 @@ def detect(frame_queue,detection_queue):
     for i in range(1, NUM_OF_FRAMES_TO_STACK):
         # Take first NUM_OF_FRAMES_TO_STACK frame and find corners in it
 
-        frame = frame_queue.get()
+        ret, frame = frame_queue.get()
         old_blur = cv2.GaussianBlur(frame, (21, 21), 0)
         fgmask = fgbg.apply(old_blur, learningRate=1)
         threshold_frame = cv2.dilate(fgmask, None, iterations=2)
@@ -42,12 +40,13 @@ def detect(frame_queue,detection_queue):
         p0, _ = get_points_from_cnts(cnts[0])
 
         old_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # Create a mask image for drawing purposes
-    # mask = np.zeros_like(frame)
-    # shared_mask.put(mask)
-    # while True: ## REMOVE
+
     while True:
-        frame = frame_queue.get()
+        ret, frame = frame_queue.get()
+        if not ret:
+            detection_queue.put((ret, [], [], [], []))
+            print("exiting detect...")
+            break
         frame_blur = cv2.GaussianBlur(frame, (21, 21), 0)
         fgmask = fgbg.apply(frame_blur, learningRate=0.2)
         threshold_frame = cv2.dilate(fgmask, None, iterations=2)
@@ -62,13 +61,13 @@ def detect(frame_queue,detection_queue):
         # calculate optical flow
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
-        ###################
+
         # Select good points
         good_new = p1[st == 1]
         good_old = p0[st == 1]
 
         if not detection_queue.full():
-            detection_queue.put([frame, good_new, good_old, bboxs])
+            detection_queue.put((ret, frame, good_new, good_old, bboxs))
 
         # Now update the previous frame
         old_gray = frame_gray.copy()

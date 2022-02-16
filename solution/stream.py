@@ -6,9 +6,8 @@ def streamer(queue, path):
     while cap.isOpened():
         while not queue.full():
             ret, frame = cap.read()
-            queue.put(frame) # enqueue the frames
-
-        while not queue.empty():
-            pass
-    cv2.destroyAllWindows()
-    cap.release()
+            queue.put((ret, frame))  # enqueue
+            if not ret:
+                print("exit stream")
+                cap.release()
+                break

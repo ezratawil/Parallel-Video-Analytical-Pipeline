@@ -9,7 +9,7 @@ def draw(detection_queue):
     while True:
         while True:
             lst = detection_queue.get() # dequeue
-            frame, good_new, good_old, bboxs = lst[0], lst[1], lst[2], lst[3] # unpack
+            frame, good_new, good_old, bboxs = lst[0], lst[1], lst[2], lst[3]
             for i, (new, old) in enumerate(zip(good_new, good_old)):
                 a, b = new.ravel()
                 c, d = old.ravel()
